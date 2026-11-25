@@ -10,6 +10,6 @@ public class JobPortalApplication {
     
     public static void main(String[] args) {
         SpringApplication.run(JobPortalApplication.class, args);
-        System.out.println("Job Opportunity and Approval System Application Started Successfully!");
+        System.out.println("ET job connect application started successfully!");
     }
 }

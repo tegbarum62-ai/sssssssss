@@ -23,4 +23,8 @@ public class RegisterRequest {
     
     @NotBlank
     private String role; // JOBSEEKER or EMPLOYER
+
+    private String companyName;
+
+    private String companyDescription;
 }

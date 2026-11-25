@@ -23,11 +23,11 @@ const Navbar = () => {
     return (
         <nav className="navbar navbar-expand-lg fixed-top navbar-transparent">
             <div className="container">
-                <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
-                    <div className="bg-dark text-white rounded p-1 d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
-                        <span className="fw-bold" style={{ fontSize: '0.9rem' }}>JOAS</span>
-                    </div>
-                    <span className="fw-bold text-dark fs-5">JOB OPPORTUNITY AND APPROVAL SYSTEM</span>
+                <Link className="navbar-brand d-flex align-items-center gap-2 text-decoration-none" to="/">
+                    <img src="/src/assets/logo.png" alt="ET job connect" style={{ height: '38px', width: 'auto' }} />
+                    <span className="fw-bold fs-5">
+                        <span style={{ color: '#1F3762' }}>ET</span> <span style={{ color: '#1F8F8C' }}>job connect</span>
+                    </span>
                 </Link>
                 <button
                     className="navbar-toggler border-0"

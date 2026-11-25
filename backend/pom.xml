@@ -13,10 +13,10 @@
     </parent>
     
     <groupId>com.jobportal</groupId>
-    <artifactId>job-opportunity-and-approval-system</artifactId>
+    <artifactId>et-job-connect</artifactId>
     <version>1.0.0</version>
-    <name>Job Opportunity and Approval System</name>
-    <description>Job Opportunity and Approval System and Career Management System</description>
+    <name>ET job connect</name>
+    <description>ET job connect career platform</description>
     
     <properties>
         <java.version>17</java.version>

@@ -177,7 +177,7 @@ const Home = () => {
                                 </div>
                                 <div className="d-flex align-items-center gap-3">
                                     <i className="bi bi-envelope fs-4 text-muted"></i>
-                                    <span className="text-muted">support@jobopportunitiesandapprovals.com</span>
+                                    <span className="text-muted">support@etjobconnect.com</span>
                                 </div>
                             </div>
                         </div>
@@ -193,8 +193,11 @@ const Home = () => {
                 <div className="container">
                     <div className="row">
                         <div className="col-lg-4 mb-4 mb-lg-0">
-                            <Link to="/" className="footer-brand">JOB OPPORTUNITY AND APPROVAL SYSTEM</Link>
-                            <p className="text-white-50">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ut enim ad minim veniam.</p>
+                            <Link to="/" className="footer-brand d-flex align-items-center gap-2 text-decoration-none mb-2">
+                                <img src="/src/assets/logo.png" alt="ET job connect" style={{ height: '32px', width: 'auto', background: 'white', borderRadius: '4px', padding: '2px' }} />
+                                <span>ET job connect</span>
+                            </Link>
+                            <p className="text-white-50">Connecting talented professionals with top employers across Ethiopia and beyond through our smart career portal.</p>
                             <div className="mt-4">
                                 <a href="#" className="social-icon"><i className="bi bi-facebook"></i></a>
                                 <a href="#" className="social-icon"><i className="bi bi-twitter"></i></a>
@@ -226,7 +229,7 @@ const Home = () => {
                         </div>
                     </div>
                     <div className="border-top border-secondary mt-5 pt-4 text-center text-white-50 small">
-                        <p>&copy; 2025 Job Opportunity and Approval System. All rights reserved.</p>
+                        <p>&copy; 2025 ET job connect. All rights reserved.</p>
                     </div>
                 </div>
             </footer>

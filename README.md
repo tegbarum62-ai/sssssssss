@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="frontend/src/assets/logo.png" alt="Job Opportunity and Approval System Logo" width="200">
-  <h1>Job Opportunity and Approval System</h1>
+  <img src="frontend/src/assets/logo.png" alt="ET job connect logo" width="200">
+  <h1>ET job connect</h1>
   <p><strong>Your Gateway to Career Success</strong></p>
 </div>
 
@@ -8,7 +8,7 @@ A comprehensive full-stack web application for connecting job seekers with emplo
 
 ## 📋 Project Overview
 
-The Job Opportunity and Approval System is a large-scale enterprise application featuring:
+ET job connect is a job platform featuring:
 - Advanced job search and filtering capabilities
 - Professional CV/Resume builder
 - Employer verification and job posting system
@@ -133,6 +133,14 @@ Job-Portal-System/
 - `POST /api/jobs` - Create new job (Employer/Admin only)
 - `PUT /api/jobs/{id}` - Update job (Employer/Admin only)
 - `DELETE /api/jobs/{id}` - Delete job (Employer/Admin only)
+- Job categories supported by the posting form include Software Development, Design, Management, Data Science, and Other.
+
+### Job and Application Workflow
+
+- Employers register with a company profile; an admin approves the employer before job posting is enabled.
+- Published jobs appear in the public jobs list and in the admin dashboard's **Jobs & Applications** page.
+- Job seekers can apply to published jobs. Applications appear in **My Applications** and the admin activity page with the initial status **Applied**.
+- Admin activity endpoints: `GET /api/admin/jobs` and `GET /api/admin/applications` (admin only).
 
 ### User Endpoints
 

@@ -1,4 +1,4 @@
-# Backend - Job Opportunity and Approval System
+# Backend - ET job connect
 
 ## Spring Boot Application
 
@@ -41,7 +41,7 @@ backend/
 3. **Build JAR**
    ```bash
    mvn package
-   java -jar target/job-opportunity-and-approval-system-1.0.0.jar
+   java -jar target/et-job-connect-1.0.0.jar
    ```
 
 ### Configuration

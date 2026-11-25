@@ -1,5 +1,6 @@
 package com.jobportal.controller;
 
+import com.jobportal.dto.ApplicationResponse;
 import com.jobportal.model.Application;
 import com.jobportal.model.Job;
 import com.jobportal.model.User;
@@ -40,7 +41,7 @@ public class ApplicationController {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        if (applicationRepository.existsByJobAndApplicant(job, applicant)) {
+        if (applicationRepository.existsByJobIdAndApplicantId(job.getId(), applicant.getId())) {
             return ResponseEntity.badRequest().body("You have already applied for this job");
         }
 
@@ -62,11 +63,13 @@ public class ApplicationController {
 
     @GetMapping("/my-applications")
     @PreAuthorize("hasRole('JOBSEEKER')")
-    public ResponseEntity<List<Application>> getMyApplications(Authentication authentication) {
+    public ResponseEntity<List<ApplicationResponse>> getMyApplications(Authentication authentication) {
         String email = authentication.getName();
         User applicant = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return ResponseEntity.ok(applicationRepository.findByApplicant(applicant));
+        return ResponseEntity.ok(applicationRepository.findByApplicant(applicant).stream()
+                .map(ApplicationResponse::from)
+                .toList());
     }
 
     @GetMapping("/job/{jobId}")

@@ -1,7 +1,9 @@
 package com.jobportal.config;
 
 import com.jobportal.model.Role;
+import com.jobportal.model.Company;
 import com.jobportal.model.User;
+import com.jobportal.repository.CompanyRepository;
 import com.jobportal.repository.RoleRepository;
 import com.jobportal.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CompanyRepository companyRepository;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -80,6 +85,17 @@ public class DataInitializer implements CommandLineRunner {
 
             userRepository.save(employer);
             System.out.println("Demo employer user initialized (hr@techcorp.com / employer123).");
+        }
+        User demoEmployer = userRepository.findByEmail("hr@techcorp.com")
+                .orElseThrow(() -> new RuntimeException("Demo employer could not be initialized."));
+        if (!companyRepository.existsByUserId(demoEmployer.getId())) {
+            companyRepository.save(Company.builder()
+                    .user(demoEmployer)
+                    .name("TechCorp Solutions")
+                    .description("Technology solutions provider")
+                    .isVerified(true)
+                    .verificationStatus(Company.VerificationStatus.APPROVED)
+                    .build());
         }
 
         // Initialize Job Seeker Demo User

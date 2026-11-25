@@ -23,6 +23,7 @@ import AdminSettings from './pages/AdminSettings'
 import AdminCVTemplates from './pages/AdminCVTemplates'
 import AdminUsers from './pages/AdminUsers'
 import AdminApprovals from './pages/AdminApprovals'
+import AdminActivity from './pages/AdminActivity'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
 import { AuthProvider, useAuth } from './context/AuthContext'
@@ -137,6 +138,14 @@ const AppContent = () => {
                         }
                     />
                     <Route
+                        path="/dashboard/admin/activity"
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <AdminActivity />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/dashboard/admin/settings"
                         element={
                             <ProtectedRoute allowedRoles={['admin']}>
@@ -176,7 +185,7 @@ const AppContent = () => {
             {!hideNavbar && (
                 <footer className="bg-white py-5 border-top mt-auto">
                     <div className="container text-center">
-                        <p className="text-muted mb-0">&copy; 2024 Job Opportunity and Approval System. All rights reserved.</p>
+                        <p className="text-muted mb-0">&copy; 2026 ET job connect. All rights reserved.</p>
                     </div>
                 </footer>
             )}

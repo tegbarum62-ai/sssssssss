@@ -1,54 +1,41 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { apiRequest } from '../api'
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [roleLabel, setRoleLabel] = useState('jobseeker'); // UI label: jobseeker, employer, employer_pending
+    const [roleLabel, setRoleLabel] = useState('jobseeker');
+    const [error, setError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    // Mock Credentials for Demo
-    const MOCK_USERS = {
-        admin: { email: 'admin@joas.com', password: 'admin123', role: 'admin', name: 'System Admin' },
-        employer: { email: 'hr@techcorp.com', password: 'employer123', role: 'employer', name: 'TechCorp HR', status: 'Active' },
-        seeker: { email: 'john@example.com', password: 'seeker123', role: 'jobseeker', name: 'John Doe', status: 'Active' }
-    };
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // 1. Check for Admin first (Hidden role)
-        if (email === MOCK_USERS.admin.email && password === MOCK_USERS.admin.password) {
-            login(MOCK_USERS.admin);
-            navigate('/dashboard/admin');
-            return;
-        }
-
-        // 2. Check for Employer or Job Seeker
-        let authenticatedUser = null;
-
-        if (roleLabel === 'jobseeker') {
-            if (email === MOCK_USERS.seeker.email && password === MOCK_USERS.seeker.password) {
-                authenticatedUser = MOCK_USERS.seeker;
-            }
-        } else if (roleLabel === 'employer') {
-            if (email === MOCK_USERS.employer.email && password === MOCK_USERS.employer.password) {
-                authenticatedUser = MOCK_USERS.employer;
-            } else if (email === 'new@startup.com' && password === 'startup123') {
-                // This email simulates a real user that isn't approved yet in the database
-                alert('Your account is waiting for admin approval. You cannot log in yet.');
-                return;
-            }
-        }
-
-        if (authenticatedUser) {
+        setSubmitting(true);
+        setError('');
+        try {
+            const response = await apiRequest('/auth/login', {
+                method: 'POST',
+                body: { email, password }
+            });
+            const role = response.role?.replace('ROLE_', '').toLowerCase();
+            const authenticatedUser = {
+                id: response.userId,
+                email: response.email,
+                name: `${response.firstName} ${response.lastName}`.trim(),
+                role,
+                isVerified: response.isVerified,
+                token: response.accessToken
+            };
             login(authenticatedUser);
-            if (authenticatedUser.role === 'employer') navigate('/dashboard/employer');
-            else navigate('/');
-        } else {
-            alert('Invalid email or password. Please use the demo credentials provided below.');
+            navigate(role === 'admin' ? '/dashboard/admin' : role === 'employer' ? '/dashboard/employer' : '/');
+        } catch (requestError) {
+            setError(requestError.message);
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -93,16 +80,10 @@ const Login = () => {
                                 </select>
                             </div>
 
-                            <button type="submit" className="btn btn-primary w-100 btn-lg mb-4 mt-2">Login</button>
-
-                            {/* Demo Credentials Box */}
-                            <div className="bg-light p-3 rounded-4 mb-3" style={{ fontSize: '0.85rem' }}>
-                                <p className="fw-bold mb-2 text-primary">Demo Credentials:</p>
-                                <div className="mb-1"><strong>Admin:</strong> admin@joas.com / admin123</div>
-                                <div className="mb-1"><strong>Employer:</strong> hr@techcorp.com / employer123</div>
-                                <div className="mb-1"><strong>Job Seeker:</strong> john@example.com / seeker123</div>
-                                <div className="mt-2 text-muted italic">Note: To test the "Pending Approval" restriction, try logging in as an Employer with 'new@startup.com' / 'startup123'.</div>
-                            </div>
+                            {error && <div className="alert alert-danger" role="alert">{error}</div>}
+                            <button type="submit" className="btn btn-primary w-100 btn-lg mb-4 mt-2" disabled={submitting}>
+                                {submitting ? 'Signing in...' : 'Login'}
+                            </button>
 
                             <p className="text-center text-muted">Don't have an account? <a href="/register" className='text-decoration-none fw-bold'>Sign up</a></p>
                         </form>

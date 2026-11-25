@@ -1,24 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { apiRequest } from '../api';
 
 const Jobs = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterCategory, setFilterCategory] = useState('All');
+    const [jobs, setJobs] = useState([]);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(true);
 
-    const mockJobs = [
-        { id: 1, title: 'Senior Frontend Developer', company: 'TechCorp Solutions', location: 'Remote', type: 'Full-time', category: 'Software Development', date: '2 days ago', salary: '$120k - $150k' },
-        { id: 2, title: 'UX/UI Designer', company: 'Creative Agency', location: 'San Francisco, CA', type: 'Full-time', category: 'Design', date: '1 day ago', salary: '$90k - $120k' },
-        { id: 3, title: 'Java Backend Engineer', company: 'Global Systems', location: 'New York, NY', type: 'Contract', category: 'Software Development', date: '3 days ago', salary: '$80 - $100/hr' },
-        { id: 4, title: 'Product Manager', company: 'Future AI', location: 'Remote', type: 'Full-time', category: 'Management', date: '5 days ago', salary: '$130k - $160k' },
-        { id: 5, title: 'Data Scientist', company: 'Data Inc.', location: 'Austin, TX', type: 'Part-time', category: 'Data Science', date: 'Today', salary: '$60k - $80k' },
-    ];
+    useEffect(() => {
+        apiRequest('/jobs?size=100')
+            .then(response => setJobs(response.content || []))
+            .catch(requestError => setError(requestError.message))
+            .finally(() => setLoading(false));
+    }, []);
 
-    const filteredJobs = mockJobs.filter(job => {
+    const filteredJobs = jobs.filter(job => {
         const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            job.company.toLowerCase().includes(searchQuery.toLowerCase());
+            (job.companyName || '').toLowerCase().includes(searchQuery.toLowerCase());
         const matchesCategory = filterCategory === 'All' || job.category === filterCategory;
         return matchesSearch && matchesCategory;
     });
+
+    const formatSalary = (job) => {
+        if (job.salaryMin == null && job.salaryMax == null) return 'Salary not specified';
+        const minimum = job.salaryMin == null ? '' : `$${Number(job.salaryMin).toLocaleString()}`;
+        const maximum = job.salaryMax == null ? '' : `$${Number(job.salaryMax).toLocaleString()}`;
+        return minimum && maximum && minimum !== maximum ? `${minimum} - ${maximum}` : minimum || maximum;
+    };
 
     return (
         <div className="container py-5 mt-5">
@@ -59,7 +69,7 @@ const Jobs = () => {
                         <div className="mb-4">
                             <label className="form-label small fw-bold text-uppercase text-muted">Category</label>
                             <div className="d-flex flex-column gap-2">
-                                {['All', 'Software Development', 'Design', 'Management', 'Data Science'].map(cat => (
+                                {['All', 'Software Development', 'Design', 'Management', 'Data Science', 'Other'].map(cat => (
                                     <div key={cat} className="form-check">
                                         <input
                                             className="form-check-input"
@@ -117,7 +127,10 @@ const Jobs = () => {
                     </div>
 
                     <div className="d-grid gap-3">
-                        {filteredJobs.length > 0 ? filteredJobs.map(job => (
+                        {error && <div className="alert alert-danger" role="alert">{error}</div>}
+                        {loading ? (
+                            <div className="text-center py-5"><div className="spinner-border text-primary" role="status" /></div>
+                        ) : filteredJobs.length > 0 ? filteredJobs.map(job => (
                             <div key={job.id} className="card border-0 shadow-sm-hover transition-all p-4 rounded-4 bg-white-hover">
                                 <div className="d-flex justify-content-between">
                                     <div className="d-flex gap-3">
@@ -126,21 +139,21 @@ const Jobs = () => {
                                         </div>
                                         <div>
                                             <h5 className="fw-bold mb-1">{job.title}</h5>
-                                            <p className="text-primary small fw-bold mb-2">{job.company}</p>
+                                            <p className="text-primary small fw-bold mb-2">{job.companyName}</p>
                                             <div className="d-flex flex-wrap gap-2 mb-0">
                                                 <span className="badge bg-light text-muted fw-normal"><i className="bi bi-geo-alt me-1"></i> {job.location}</span>
-                                                <span className="badge bg-light text-muted fw-normal"><i className="bi bi-clock me-1"></i> {job.type}</span>
-                                                <span className="badge bg-light text-success fw-bold"><i className="bi bi-cash me-1"></i> {job.salary}</span>
+                                                <span className="badge bg-light text-muted fw-normal"><i className="bi bi-clock me-1"></i> {job.jobType?.replace('_', ' ')}</span>
+                                                <span className="badge bg-light text-success fw-bold"><i className="bi bi-cash me-1"></i> {formatSalary(job)}</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="text-end">
-                                        <div className="text-muted small mb-3">{job.date}</div>
+                                        <div className="text-muted small mb-3">{job.createdAt ? new Date(job.createdAt).toLocaleDateString() : ''}</div>
                                         <Link to={`/jobs/${job.id}`} className="btn btn-teal text-white px-4">Details</Link>
                                     </div>
                                 </div>
                             </div>
-                        )) : (
+                        )) : !error && (
                             <div className="text-center py-5">
                                 <i className="bi bi-search display-1 text-light mb-3"></i>
                                 <p className="text-muted">No jobs found matching your criteria.</p>

@@ -1,4 +1,4 @@
--- Job Opportunity and Approval System Database Schema
+-- ET job connect database schema
 -- MySQL Database Schema
 
 -- Drop existing database if exists

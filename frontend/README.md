@@ -1,6 +1,6 @@
-# Job Opportunity and Approval System - Frontend
+# ET job connect - Frontend
 
-This is the frontend client for the Job Opportunity and Approval System, built with **React**, **Vite**, and **Bootstrap 5**.
+This is the frontend client for ET job connect, built with **React**, **Vite**, and **Bootstrap 5**.
 
 ## 🚀 Tech Stack
 

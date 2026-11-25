@@ -5,7 +5,7 @@ const About = () => {
         <div className="container py-5 mt-5">
             <div className="row align-items-center">
                 <div className="col-lg-6">
-                    <h2 className="fw-bold mb-4">About Job Opportunity and Approval System</h2>
+                    <h2 className="fw-bold mb-4">About ET job connect</h2>
                     <p className="lead text-muted">We are dedicated to connecting talent with opportunity on a global scale.</p>
                     <p className="text-muted">Our mission is to make the job search process as seamless and efficient as possible for both employers and job seekers.</p>
                 </div>

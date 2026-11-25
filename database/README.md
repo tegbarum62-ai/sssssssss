@@ -1,4 +1,4 @@
-# Database - Job Opportunity and Approval System
+# Database - ET job connect
 
 ## MySQL Database
 

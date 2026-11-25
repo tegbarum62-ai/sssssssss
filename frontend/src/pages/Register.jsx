@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiRequest } from '../api'
 
 const Register = () => {
     const [role, setRole] = useState('jobseeker');
@@ -10,24 +11,38 @@ const Register = () => {
         companyName: '',
         companyDetails: ''
     });
+    const [error, setError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // In a real app, this would call the API
-        console.log('Registering:', { ...formData, role });
-
-        if (role === 'employer') {
-            alert('Registration successful! Please wait for Admin approval before you can post jobs.');
-        } else {
-            alert('Registration successful!');
+        const [firstName, ...lastNameParts] = formData.name.trim().split(/\s+/);
+        setSubmitting(true);
+        setError('');
+        try {
+            await apiRequest('/auth/register', {
+                method: 'POST',
+                body: {
+                    firstName,
+                    lastName: lastNameParts.join(' ') || firstName,
+                    email: formData.email,
+                    password: formData.password,
+                    role: role === 'employer' ? 'EMPLOYER' : 'JOBSEEKER',
+                    companyName: formData.companyName,
+                    companyDescription: formData.companyDetails
+                }
+            });
+            navigate('/login', { state: { registrationComplete: true, role } });
+        } catch (requestError) {
+            setError(requestError.message);
+        } finally {
+            setSubmitting(false);
         }
-
-        navigate('/login');
     };
 
     return (
@@ -112,7 +127,10 @@ const Register = () => {
                                 />
                             </div>
 
-                            <button type="submit" className="btn btn-primary w-100 btn-lg mb-3">Sign Up</button>
+                            {error && <div className="alert alert-danger" role="alert">{error}</div>}
+                            <button type="submit" className="btn btn-primary w-100 btn-lg mb-3" disabled={submitting}>
+                                {submitting ? 'Creating account...' : 'Sign Up'}
+                            </button>
                             <p className="text-center text-muted">Already have an account? <a href="/login" className='text-decoration-none'>Login</a></p>
                         </form>
                     </div>

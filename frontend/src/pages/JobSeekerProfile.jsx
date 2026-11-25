@@ -1,29 +1,63 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
+import { apiRequest } from '../api';
 
 const JobSeekerProfile = () => {
     const { user, logout } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
+
     const [profile, setProfile] = useState({
-        name: user?.name || 'John Doe',
-        email: user?.email || 'john@example.com',
-        phone: '+254 712 345 678',
-        location: 'Nairobi, Kenya',
-        bio: 'Passionate software developer with 3 years of experience in React and Java.',
-        status: 'Actively Looking'
+        firstName: 'John',
+        lastName: 'Doe',
+        email: user?.email || 'john.doe@email.com',
+        phone: '+1 415-555-0133',
+        location: 'San Francisco, CA',
+        headline: 'Senior Full Stack & Cloud Engineer',
+        bio: 'Senior Software Engineer with 5+ years specializing in React, TypeScript, and distributed backend microservices. Passionate about scalable distributed architectures and intuitive user experiences.',
+        jobSeekerStatus: 'Actively Looking',
+        skills: 'React, TypeScript, Node.js, Python, PostgreSQL, Docker, AWS'
     });
 
-    const handleUpdate = (e) => {
-        e.preventDefault();
-        setIsEditing(false);
-        alert('Profile updated successfully!');
-    };
+    useEffect(() => {
+        setLoading(true);
+        apiRequest(`/user/profile?email=${encodeURIComponent(user?.email || 'john.doe@email.com')}`)
+            .then(data => {
+                if (data) {
+                    setProfile(prev => ({
+                        ...prev,
+                        ...data,
+                        headline: data.headline || prev.headline,
+                        bio: data.bio || prev.bio,
+                        jobSeekerStatus: data.jobSeekerStatus || prev.jobSeekerStatus,
+                        skills: data.skills || prev.skills
+                    }));
+                }
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, [user]);
 
-    const handleDelete = () => {
-        if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-            alert('Account deleted.');
-            logout();
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccessMsg('');
+        try {
+            const updated = await apiRequest('/user/profile', {
+                method: 'PUT',
+                body: {
+                    ...profile,
+                    email: user?.email || profile.email
+                }
+            });
+            setProfile(prev => ({ ...prev, ...updated }));
+            setIsEditing(false);
+            setSuccessMsg('Your personal profile has been updated successfully!');
+        } catch (err) {
+            setError(err.message);
         }
     };
 
@@ -31,7 +65,10 @@ const JobSeekerProfile = () => {
         <DashboardLayout role="jobseeker">
             <div className="content-card">
                 <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                    <h4 className="fw-bold mb-0">My Profile</h4>
+                    <div>
+                        <h4 className="fw-bold mb-1">Personal Career Profile</h4>
+                        <p className="text-muted small mb-0">Manage your public credentials, skills, and employment search status.</p>
+                    </div>
                     {!isEditing && (
                         <button className="btn btn-outline-primary btn-sm" onClick={() => setIsEditing(true)}>
                             <i className="bi bi-pencil me-1"></i> Edit Profile
@@ -39,26 +76,24 @@ const JobSeekerProfile = () => {
                     )}
                 </div>
 
+                {error && <div className="alert alert-danger shadow-sm py-2 mb-3" role="alert">{error}</div>}
+                {successMsg && <div className="alert alert-success shadow-sm py-2 mb-3" role="alert">{successMsg}</div>}
+
                 <div className="row">
                     <div className="col-md-4 text-center border-end">
-                        <div className="position-relative d-inline-block mb-3">
-                            <div className="bg-light rounded-circle p-4 d-flex align-items-center justify-content-center border" style={{ width: '130px', height: '130px' }}>
-                                <i className="bi bi-person display-4 text-secondary"></i>
-                            </div>
-                            <button className="btn btn-sm btn-dark position-absolute bottom-0 end-0 rounded-circle" style={{ width: '32px', height: '32px', padding: '0' }}>
-                                <i className="bi bi-camera-fill small"></i>
-                            </button>
+                        <div className="bg-primary-subtle text-primary rounded-circle p-4 d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '130px', height: '130px' }}>
+                            <i className="bi bi-person-circle display-4"></i>
                         </div>
-                        <h5 className="fw-bold mb-1">{profile.name}</h5>
-                        <p className="text-muted small mb-3">{profile.location}</p>
-                        <span className="badge bg-success-soft text-success rounded-pill px-3 py-2 mb-4" style={{ backgroundColor: '#e8f5e9' }}>
-                            <i className="bi bi-circle-fill me-2" style={{ fontSize: '0.5rem' }}></i> {profile.status}
+                        <h5 className="fw-bold mb-1">{profile.firstName} {profile.lastName}</h5>
+                        <p className="text-muted small mb-2">{profile.headline}</p>
+                        <span className="badge bg-success-subtle text-success border border-success rounded-pill px-3 py-1 mb-4">
+                            <i className="bi bi-circle-fill me-1" style={{ fontSize: '0.5rem' }}></i> {profile.jobSeekerStatus}
                         </span>
 
-                        <div className="d-grid gap-2 mt-2">
-                            <button className="btn btn-outline-danger btn-sm" onClick={handleDelete}>
-                                <i className="bi bi-trash me-1"></i> Delete Account
-                            </button>
+                        <div className="text-muted small text-start ps-3 border-top pt-3">
+                            <div className="mb-2"><i className="bi bi-envelope me-2"></i> {profile.email}</div>
+                            <div className="mb-2"><i className="bi bi-telephone me-2"></i> {profile.phone}</div>
+                            <div className="mb-2"><i className="bi bi-geo-alt me-2"></i> {profile.location}</div>
                         </div>
                     </div>
 
@@ -67,17 +102,46 @@ const JobSeekerProfile = () => {
                             <form onSubmit={handleUpdate}>
                                 <div className="row g-3">
                                     <div className="col-md-6">
-                                        <label className="form-label small fw-bold">Full Name</label>
+                                        <label className="form-label small fw-bold">First Name</label>
                                         <input
                                             type="text"
                                             className="form-control"
-                                            value={profile.name}
-                                            onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                                            value={profile.firstName}
+                                            onChange={e => setProfile({ ...profile, firstName: e.target.value })}
+                                            required
                                         />
                                     </div>
                                     <div className="col-md-6">
-                                        <label className="form-label small fw-bold">Email</label>
-                                        <input type="email" className="form-control" value={profile.email} disabled />
+                                        <label className="form-label small fw-bold">Last Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={profile.lastName}
+                                            onChange={e => setProfile({ ...profile, lastName: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Professional Headline</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="e.g. Senior Full Stack Engineer"
+                                            value={profile.headline}
+                                            onChange={e => setProfile({ ...profile, headline: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Job Search Status</label>
+                                        <select
+                                            className="form-select"
+                                            value={profile.jobSeekerStatus}
+                                            onChange={e => setProfile({ ...profile, jobSeekerStatus: e.target.value })}
+                                        >
+                                            <option>Actively Looking</option>
+                                            <option>Open to Opportunities</option>
+                                            <option>Not Looking</option>
+                                        </select>
                                     </div>
                                     <div className="col-md-6">
                                         <label className="form-label small fw-bold">Phone</label>
@@ -85,7 +149,7 @@ const JobSeekerProfile = () => {
                                             type="text"
                                             className="form-control"
                                             value={profile.phone}
-                                            onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                                            onChange={e => setProfile({ ...profile, phone: e.target.value })}
                                         />
                                     </div>
                                     <div className="col-md-6">
@@ -94,46 +158,54 @@ const JobSeekerProfile = () => {
                                             type="text"
                                             className="form-control"
                                             value={profile.location}
-                                            onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                                            onChange={e => setProfile({ ...profile, location: e.target.value })}
                                         />
                                     </div>
                                     <div className="col-12">
-                                        <label className="form-label small fw-bold">Professional Bio</label>
+                                        <label className="form-label small fw-bold">Skills (comma separated)</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={profile.skills}
+                                            onChange={e => setProfile({ ...profile, skills: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label small fw-bold">Bio & Professional Summary</label>
                                         <textarea
                                             className="form-control"
                                             rows="4"
                                             value={profile.bio}
-                                            onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                                            onChange={e => setProfile({ ...profile, bio: e.target.value })}
                                         ></textarea>
                                     </div>
-                                    <div className="col-12 d-flex gap-2 pt-3">
-                                        <button type="submit" className="btn btn-teal px-4 text-white">Save Changes</button>
-                                        <button type="button" className="btn btn-outline-secondary" onClick={() => setIsEditing(false)}>Cancel</button>
+                                    <div className="col-12 pt-2 d-flex gap-2">
+                                        <button type="submit" className="btn btn-teal text-white fw-bold px-4">
+                                            Save Changes
+                                        </button>
+                                        <button type="button" className="btn btn-outline-secondary" onClick={() => setIsEditing(false)}>
+                                            Cancel
+                                        </button>
                                     </div>
                                 </div>
                             </form>
                         ) : (
-                            <div className="profile-view">
+                            <div>
                                 <div className="mb-4">
-                                    <label className="text-muted small fw-bold text-uppercase">About Me</label>
-                                    <p className="mt-1 text-dark">{profile.bio}</p>
+                                    <h6 className="fw-bold text-uppercase text-muted small">About Me</h6>
+                                    <p className="mt-1 text-dark lead" style={{ fontSize: '1rem' }}>
+                                        {profile.bio}
+                                    </p>
                                 </div>
-                                <div className="row g-4">
-                                    <div className="col-sm-6">
-                                        <label className="text-muted small fw-bold text-uppercase">Email</label>
-                                        <p className="mt-1 fw-bold">{profile.email}</p>
-                                    </div>
-                                    <div className="col-sm-6">
-                                        <label className="text-muted small fw-bold text-uppercase">Phone</label>
-                                        <p className="mt-1 fw-bold">{profile.phone}</p>
-                                    </div>
-                                    <div className="col-sm-6">
-                                        <label className="text-muted small fw-bold text-uppercase">Preferred Location</label>
-                                        <p className="mt-1 fw-bold">{profile.location}</p>
-                                    </div>
-                                    <div className="col-sm-6">
-                                        <label className="text-muted small fw-bold text-uppercase">Profile Status</label>
-                                        <p className="mt-1 text-primary fw-bold">Account Active</p>
+
+                                <div className="mb-4">
+                                    <h6 className="fw-bold text-uppercase text-muted small">Core Competencies & Skills</h6>
+                                    <div className="d-flex flex-wrap gap-2 mt-2">
+                                        {(profile.skills || '').split(',').map((skill, index) => (
+                                            <span key={index} className="badge bg-light text-dark border px-3 py-2">
+                                                {skill.trim()}
+                                            </span>
+                                        ))}
                                     </div>
                                 </div>
                             </div>

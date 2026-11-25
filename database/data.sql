@@ -1,4 +1,4 @@
--- Sample Data for Job Opportunity and Approval System Database
+-- Sample data for ET job connect database
 USE job_portal_db;
 
 -- Insert Roles
